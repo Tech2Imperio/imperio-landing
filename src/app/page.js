@@ -1,32 +1,17 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { State, City } from "country-state-city";
-import {
-  ChevronRight,
-  Phone,
-  Mail,
-  MapPin,
-  Check,
-  Star,
-  ArrowRight,
-} from "lucide-react";
+import { ChevronRight, Phone, Mail, MapPin, Check } from "lucide-react";
 import hero from "../../public/hero.webp";
 import deck from "../../public/deck.png";
 import framedbalcony from "../../public/framedbalcony.png";
 import beachside from "../../public/beachside.png";
-import cornerglass from "../../public/cornerglass.png";
-import homebalcony from "../../public/homebalcony.png";
 import homefence from "../../public/homefence.png";
 import staircase from "../../public/staircase.jpg";
-import mukesh from "../../public/mukeshambani.webp";
-import rakesh from "../../public/rakeshjhunjhunwala.webp";
-import salman from "../../public/salmankhan.webp";
 import whiteLogo from "../../public/Blacklogo.png";
+import blacklogo from "../../public/White.webp";
 import { Button } from "./components/Button";
-import { Input } from "./components/Input";
-import { Textarea } from "./components/Textarea";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Form } from "./components/Form";
 import { Counter } from "./components/Counter";
 export default function Home() {
@@ -34,6 +19,78 @@ export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [hasClosedOnce, setHasClosedOnce] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Animation refs
+  const heroRef = useRef(null);
+  const aboutRef = useRef(null);
+  const featuresRef = useRef(null);
+  const productsRef = useRef(null);
+  const galleryRef = useRef(null);
+  const contactRef = useRef(null);
+  const footerRef = useRef(null);
+
+  // Animation elements refs
+  const animatedElements = useRef([]);
+
+  // Add element to animated elements array
+  const addAnimatedElement = (el) => {
+    if (el && !animatedElements.current.includes(el)) {
+      animatedElements.current.push(el);
+    }
+  };
+
+  // Intersection Observer setup
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.1,
+    };
+
+    const handleIntersect = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("animate-in");
+          // For staggered children animations
+          if (entry.target.dataset.parent) {
+            const children = entry.target.querySelectorAll("[data-child]");
+            children.forEach((child, index) => {
+              setTimeout(() => {
+                child.classList.add("animate-in");
+              }, index * 100); // 100ms stagger
+            });
+          }
+          observer.unobserve(entry.target);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, observerOptions);
+
+    // Observe all section refs
+    [
+      heroRef,
+      aboutRef,
+      featuresRef,
+      productsRef,
+      galleryRef,
+      contactRef,
+      footerRef,
+    ].forEach((ref) => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    // Observe all animated elements
+    animatedElements.current.forEach((el) => {
+      observer.observe(el);
+    });
+
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, []);
 
   const images = [
     { src: hero, location: "Jogeshwari" },
@@ -68,8 +125,91 @@ export default function Home() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Add CSS for animations */}
+      <style jsx global>{`
+        /* Base animation classes */
+        .fade-up,
+        .fade-down,
+        .fade-left,
+        .fade-right,
+        .fade-in,
+        .scale-in {
+          opacity: 0;
+          transition: all 0.8s ease-out;
+        }
+
+        .fade-up {
+          transform: translateY(30px);
+        }
+
+        .fade-down {
+          transform: translateY(-30px);
+        }
+
+        .fade-left {
+          transform: translateX(-30px);
+        }
+
+        .fade-right {
+          transform: translateX(30px);
+        }
+
+        .scale-in {
+          transform: scale(0.9);
+        }
+
+        /* Animation trigger class */
+        .animate-in {
+          opacity: 1;
+          transform: translate(0, 0) scale(1);
+        }
+
+        /* Staggered children delays */
+        [data-child="1"] {
+          transition-delay: 0.1s;
+        }
+        [data-child="2"] {
+          transition-delay: 0.2s;
+        }
+        [data-child="3"] {
+          transition-delay: 0.3s;
+        }
+        [data-child="4"] {
+          transition-delay: 0.4s;
+        }
+        [data-child="5"] {
+          transition-delay: 0.5s;
+        }
+        [data-child="6"] {
+          transition-delay: 0.6s;
+        }
+
+        /* Hover transitions */
+        .hover-scale {
+          transition: transform 0.3s ease;
+        }
+
+        .hover-scale:hover {
+          transform: scale(1.05);
+        }
+
+        .image-zoom {
+          transition: transform 0.7s ease;
+        }
+
+        .image-zoom:hover {
+          transform: scale(1.1);
+        }
+
+        /* Navbar animation */
+        .nav-transition {
+          transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+      `}</style>
+
       <Form
         isOpen={isModalOpen}
         isFloating={true}
@@ -85,8 +225,10 @@ export default function Home() {
       />
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <nav
-          className={`bg-white shadow-md fixed top-0 w-full transition-transform duration-300 ${
-            isVisible ? "translate-y-0" : "-translate-y-full"
+          className={`bg-white shadow-md fixed top-0 w-full nav-transition ${
+            isVisible
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-full opacity-0"
           }`}
         >
           <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-48">
@@ -94,176 +236,68 @@ export default function Home() {
               {/* Logo */}
               <div className="text-2xl font-bold flex flex-start">
                 <Image
-                  src={whiteLogo}
+                  src={whiteLogo || "/placeholder.svg"}
                   alt="Imperio Glass Railings Logo"
                   width={120}
                   height={120}
-                  className="rounded"
+                  className="rounded hover-scale"
                 />
               </div>
 
               <a href="tel:+91 8591953385">
-                <button className="px-6 py-3 text-lg font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-400 transition duration-300">
+                <button className="px-6 py-3 text-lg font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-400 transition duration-300 hover-scale">
                   Call Now
                 </button>
               </a>
             </div>
           </div>
         </nav>
-        {/* Mobile Toggle Button */}
-        {/* <Button
-                variant="outline"
-                size="icon"
-                className="md:hidden"
-                onClick={() => setIsOpen(!isOpen)}
-              >
-                <span className="sr-only">Toggle menu</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6"
-                >
-                  <line x1="4" x2="20" y1="12" y2="12" />
-                  <line x1="4" x2="20" y1="6" y2="6" />
-                  <line x1="4" x2="20" y1="18" y2="18" />
-                </svg>
-              </Button> */}
-
-        {/* Desktop Menu */}
-        {/* <div className="hidden md:flex space-x-6">
-                <a href="#" className="text-white px-4 py-2 hover:bg-gray-900">
-                  Home
-                </a>
-
-                <a
-                  href="#about"
-                  className="text-white px-4 py-2 hover:bg-gray-900"
-                >
-                  About
-                </a>
-                <a
-                  href="#features"
-                  className="text-white px-4 py-2 hover:bg-gray-900"
-                >
-                  Features
-                </a>
-                <a
-                  href="#products"
-                  className="text-white px-4 py-2 hover:bg-gray-900"
-                >
-                  Products
-                </a>
-                <a
-                  href="#gallery"
-                  className="text-white px-4 py-2 hover:bg-gray-900"
-                >
-                  Gallery
-                </a>
-                <a
-                  href="#testimonials"
-                  className="text-white px-4 py-2 hover:bg-gray-900"
-                >
-                  Testimonials
-                </a>
-                <a
-                  href="#contact"
-                  className="text-white px-4 py-2 hover:bg-gray-900"
-                >
-                  Contact
-                </a>
-              </div>
-            </div> */}
-
-        {/* Mobile Menu (Dropdown) */}
-        {/* <div
-              className={`md:hidden transition-all duration-300 ease-in-out ${
-                isOpen
-                  ? "max-h-40 opacity-100"
-                  : "max-h-0 opacity-0 overflow-hidden"
-              }`}
-            >
-              <div className="flex flex-col space-y-2 bg-white py-4 shadow-md rounded-lg">
-                <a
-                  href="#"
-                  className="text-gray-700 px-4 py-2 hover:bg-gray-100"
-                >
-                  Home
-                </a>
-
-                <a
-                  href="#about"
-                  className="text-gray-700 px-4 py-2 hover:bg-gray-100"
-                >
-                  About
-                </a>
-                <a
-                  href="#features"
-                  className="text-gray-700 px-4 py-2 hover:bg-gray-100"
-                >
-                  Features
-                </a>
-                <a
-                  href="#products"
-                  className="text-gray-700 px-4 py-2 hover:bg-gray-100"
-                >
-                  Products
-                </a>
-                <a
-                  href="#gallery"
-                  className="text-gray-700 px-4 py-2 hover:bg-gray-100"
-                >
-                  Gallery
-                </a>
-                <a
-                  href="#testimonials"
-                  className="text-gray-700 px-4 py-2 hover:bg-gray-100"
-                >
-                  Testimonials
-                </a>
-                <a
-                  href="#contact"
-                  className="text-gray-700 px-4 py-2 hover:bg-gray-100"
-                >
-                  Contact
-                </a>
-              </div> */}
       </header>
       <main className="flex-1">
         <section
           id="home"
           className="relative flex justify-center items-center px-10"
+          ref={heroRef}
         >
           <div className="absolute inset-0 z-0">
             <Image
-              src={hero}
+              src={hero || "/placeholder.svg"}
               alt="Modern glass railing installation"
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-10000 hover:scale-105"
               priority
             />
             <div className="absolute inset-0 bg-black/40" />
           </div>
-          <div className="container relative z-10 py-24 md:py-32 lg:py-40">
+          <div
+            className="container relative z-10 py-24 md:py-32 lg:py-40"
+            data-parent
+          >
             <div className="max-w-2xl text-white">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+              <h1
+                className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl fade-up"
+                data-child="1"
+                ref={addAnimatedElement}
+              >
                 Elegant Glass Railings for Modern Spaces
               </h1>
-              <p className="mt-6 text-lg md:text-xl">
+              <p
+                className="mt-6 text-lg md:text-xl fade-up"
+                data-child="2"
+                ref={addAnimatedElement}
+              >
                 Transform your property with our premium glass railing
                 solutions. Combining safety, durability, and stunning aesthetics
                 for residential and commercial spaces.
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <div
+                className="mt-8 flex flex-col sm:flex-row gap-4 fade-up"
+                data-child="3"
+                ref={addAnimatedElement}
+              >
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto transition-all duration-300 hover-scale"
                   onClick={() => setIsModalOpen(true)}
                 >
                   Get a Free Quote
@@ -272,7 +306,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto text-white bg-white/10 backdrop-blur-sm"
+                  className="w-full sm:w-auto text-white bg-white/10 backdrop-blur-sm transition-all duration-300 hover-scale"
                   onClick={() => setIsModalOpen(true)}
                 >
                   Download Brochure
@@ -285,10 +319,11 @@ export default function Home() {
         <section
           id="about"
           className="py-16 md:py-24 bg-slate-50 flex justify-center items-center px-10"
+          ref={aboutRef}
         >
           <div className="container">
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
+              <div className="fade-left" ref={addAnimatedElement}>
                 <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
                   Transform Your Home With Premium Aluminium Glass Railings
                 </h2>
@@ -299,37 +334,45 @@ export default function Home() {
                   environment. We specialize in designing elegant and durable
                   railings for balconies, staircases, and building facades.
                 </p>
-                <div className="flex justify-start items-center space-x-20">
-                  <div className="flex flex-col justify-center items-left">
+                <div
+                  className="flex justify-start items-center space-x-20"
+                  data-parent
+                >
+                  <div
+                    className="flex flex-col justify-center items-left fade-up"
+                    data-child="1"
+                    ref={addAnimatedElement}
+                  >
                     <h2>Happy Clients</h2>
                     <Counter target={4000} />
-                    {/* <span className="text-3xl font-semibold">4000 + </span> */}
                   </div>
-                  <div className="flex flex-col justify-center items-left">
+                  <div
+                    className="flex flex-col justify-center items-left fade-up"
+                    data-child="2"
+                    ref={addAnimatedElement}
+                  >
                     <h2>Projects</h2>
                     <Counter target={7000} />
-                    {/* <span className="text-3xl font-semibold">7000 + </span> */}
                   </div>
-                  <div className="flex flex-col justify-center items-left">
+                  <div
+                    className="flex flex-col justify-center items-left fade-up"
+                    data-child="3"
+                    ref={addAnimatedElement}
+                  >
                     <h2>City</h2>
                     <Counter target={100} />
-                    {/* <span className="text-3xl font-semibold">100 + </span> */}
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                  {/* <a href="#contact" className="text-gray-700 ">
-                    <Button className=" px-6 py-3 text-lg md:text-xl bg-blue-500 hover:bg-blue-700">
-                      <h1 className="text-lg md:text-xl">Learn More</h1>
-                    </Button>
-                  </a> */}
-                </div>
               </div>
-              <div className="relative h-[400px] rounded-lg overflow-hidden">
+              <div
+                className="relative h-[400px] rounded-lg overflow-hidden fade-right"
+                ref={addAnimatedElement}
+              >
                 <Image
-                  src={deck}
+                  src={deck || "/placeholder.svg"}
                   alt="Our team installing glass railings"
                   fill
-                  className="object-cover"
+                  className="object-cover image-zoom"
                 />
               </div>
             </div>
@@ -339,9 +382,13 @@ export default function Home() {
         <section
           id="features"
           className="py-16 md:py-24 flex justify-center items-center px-6"
+          ref={featuresRef}
         >
           <div className="container">
-            <div className="text-center max-w-3xl mx-auto mb-12">
+            <div
+              className="text-center max-w-3xl mx-auto mb-12 fade-up"
+              ref={addAnimatedElement}
+            >
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
                 Why Choose Us?
               </h2>
@@ -351,8 +398,10 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Grid Layout */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            <div
+              className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6"
+              data-parent
+            >
               {[
                 {
                   title: "Weather & Corrosion Resistant",
@@ -387,7 +436,9 @@ export default function Home() {
               ].map((feature, index) => (
                 <div
                   key={index}
-                  className="bg-gray-100 p-4 md:p-6 rounded-lg shadow-md"
+                  className="bg-gray-100 p-4 md:p-6 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover-scale fade-up"
+                  data-child={index + 1}
+                  ref={addAnimatedElement}
                 >
                   <div className="flex flex-col items-left space-x-3 mb-3 md:mb-4">
                     <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -403,10 +454,13 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div className="flex w-full justify-center items-center mt-10">
+            <div
+              className="flex w-full justify-center items-center mt-10 fade-up"
+              ref={addAnimatedElement}
+            >
               <Button
                 size="lg"
-                className="w-1/3 sm:w-auto"
+                className="w-1/3 sm:w-auto transition-all duration-300 hover-scale"
                 onClick={() => setIsModalOpen(true)}
               >
                 <h1 className="text-xl text-white">
@@ -420,9 +474,13 @@ export default function Home() {
         <section
           id="products"
           className="py-16 bg-slate-50 flex justify-center items-center px-10"
+          ref={productsRef}
         >
           <div className="container">
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div
+              className="text-center max-w-3xl mx-auto mb-16 fade-up"
+              ref={addAnimatedElement}
+            >
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-8">
                 Our Glass Railing Solutions
               </h2>
@@ -431,14 +489,21 @@ export default function Home() {
                 application.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg overflow-hidden shadow-sm border">
+            <div
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
+              data-parent
+            >
+              <div
+                className="bg-white rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover-scale fade-up"
+                data-child="1"
+                ref={addAnimatedElement}
+              >
                 <div className="relative h-84">
                   <Image
-                    src={beachside}
+                    src={beachside || "/placeholder.svg"}
                     alt="Frameless glass railing"
                     fill
-                    className="object-cover"
+                    className="object-cover image-zoom"
                   />
                 </div>
                 <div className="p-6">
@@ -449,19 +514,19 @@ export default function Home() {
                     Sleek, minimalist design with no visible posts or frames for
                     a completely unobstructed view.
                   </p>
-                  {/* <Button variant="outline" className="w-full">
-                    Learn More
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button> */}
                 </div>
               </div>
-              <div className="bg-white rounded-lg overflow-hidden shadow-sm border">
+              <div
+                className="bg-white rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover-scale fade-up"
+                data-child="2"
+                ref={addAnimatedElement}
+              >
                 <div className="relative h-84">
                   <Image
-                    src={staircase}
+                    src={staircase || "/placeholder.svg"}
                     alt="Stainless steel post glass railing"
                     fill
-                    className="object-cover"
+                    className="object-cover image-zoom"
                   />
                 </div>
                 <div className="p-6">
@@ -470,19 +535,19 @@ export default function Home() {
                     Contemporary design combining sleek stainless steel posts
                     with clear glass panels.
                   </p>
-                  {/* <Button variant="outline" className="w-full">
-                    Learn More
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button> */}
                 </div>
               </div>
-              <div className="bg-white rounded-lg overflow-hidden shadow-sm border">
+              <div
+                className="bg-white rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover-scale fade-up"
+                data-child="3"
+                ref={addAnimatedElement}
+              >
                 <div className="relative h-84">
                   <Image
-                    src={homefence}
+                    src={homefence || "/placeholder.svg"}
                     alt="Aluminum base glass railing"
                     fill
-                    className="object-cover"
+                    className="object-cover image-zoom"
                   />
                 </div>
                 <div className="p-6">
@@ -491,30 +556,28 @@ export default function Home() {
                     Durable aluminum base channels with tempered glass panels
                     for a clean, modern look.
                   </p>
-                  {/* <Button variant="outline" className="w-full">
-                    Learn More
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button> */}
                 </div>
               </div>
             </div>
-
-            {/* <div className="text-center mt-12">
-              <Button size="lg">View All Products</Button>
-            </div> */}
           </div>
         </section>
 
         <section
           id="gallery"
-          className="py-16 md:py-24 flex justify-center items-center px-10"
+          className="py-16 md:py-24 flex justify-center items-center px-10 bg-gray-50"
+          ref={galleryRef}
         >
           <div className="container flex">
-            <div className="w-1/2 flex flex-wrap justify-center gap-8">
+            <div
+              className="w-1/2 flex flex-wrap justify-center gap-8"
+              data-parent
+            >
               {images.map((image, i) => (
                 <div
                   key={i}
-                  className="relative overflow-hidden rounded-lg h-[80px] w-[80px] md:h-[120px] md:w-[120px] lg:h-[250px] lg:w-[250px] flex-shrink-0"
+                  className="relative overflow-hidden rounded-lg h-[80px] w-[80px] md:h-[120px] md:w-[120px] lg:h-[250px] lg:w-[250px] flex-shrink-0 scale-in"
+                  data-child={i + 1}
+                  ref={addAnimatedElement}
                 >
                   {/* Shadow Effect at the Top */}
                   <div className="absolute top-0 left-0 w-full h-10 bg-gradient-to-b from-black/30 to-transparent z-5"></div>
@@ -527,16 +590,19 @@ export default function Home() {
 
                   {/* Image - Behind Everything */}
                   <Image
-                    src={image.src}
+                    src={image.src || "/placeholder.svg"}
                     alt={`Glass railing project ${i + 1}`}
                     layout="fill"
                     objectFit="cover"
-                    className="transition-transform hover:scale-105 z-0"
+                    className="image-zoom z-0"
                   />
                 </div>
               ))}
             </div>
-            <div className="w-1/2 max-w-3xl mx-auto mb-4">
+            <div
+              className="w-1/2 max-w-3xl mx-auto mb-4 fade-right"
+              ref={addAnimatedElement}
+            >
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
                 Recent Projects
               </h2>
@@ -550,8 +616,8 @@ export default function Home() {
                 vision to life.
               </p>
               <div className="flex w-full sm:flex-row gap-4 mt-8">
-                <a href="#contact" className="text-gray-700 ">
-                  <Button className=" px-6 py-3 text-lg md:text-xl bg-blue-500 hover:bg-blue-700">
+                <a href="#contact" className="text-gray-700">
+                  <Button className="px-6 py-3 text-lg md:text-xl bg-blue-500 hover:bg-blue-700 transition-all duration-300 hover-scale">
                     <h1 className="text-md md:text-md">Connect with us now</h1>
                   </Button>
                 </a>
@@ -560,88 +626,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* <section
-          id="testimonials"
-          className="py-16 md:py-24 bg-slate-50 flex justify-center items-center px-10"
-        >
-          <div className="container">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-                What Our Clients Say
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Hear from our satisfied customers about their experience with
-                Imperio Glass Railings.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  name: "Mukesh Ambani",
-                  profile: mukesh,
-                  role: "Mumbai, India",
-                  content:
-                    "Mukesh Ambani, RIL Chairman, launched Reliance Jio in 2016, transforming Indian telecom with 400+ million subscribers",
-                },
-                {
-                  name: "Rakesh Jhunjhunwala",
-                  profile: rakesh,
-                  role: "Mumbai, India",
-                  content:
-                    "Rakesh Jhunjhunwala, dubbed the Warren Buffett of India, is a billionaire investor celebrated for his successful stock market ventures and influential role in finance.",
-                },
-                {
-                  name: "Salman Khan",
-                  profile: salman,
-                  role: "Mumbai, India",
-                  content:
-                    "Salman Khan, a Bollywood superstar renowned for blockbuster films and philanthropic efforts through Being Human NGO.",
-                },
-              ].map((testimonial, i) => (
-                <div
-                  key={i}
-                  className="bg-white p-8 rounded-lg shadow-sm border"
-                >
-                  <div className="flex items-center gap-1 mb-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-5 w-5 fill-yellow-400 text-yellow-400"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-6">
-                    "{testimonial.content}"
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-slate-200">
-                      <Image
-                        src={testimonial.profile}
-                        alt={testimonial.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">{testimonial.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {testimonial.role}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section> */}
-
         <section
           id="contact"
           className="py-16 md:py-24 flex justify-center items-center px-10"
+          ref={contactRef}
         >
           <div className="container">
-            <div className="grid md:grid-cols-2 gap-12 items-start ">
-              <div>
+            <div className="grid md:grid-cols-2 gap-12 items-start">
+              <div className="fade-left" ref={addAnimatedElement}>
                 <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
                   Get in Touch
                 </h2>
@@ -649,15 +641,23 @@ export default function Home() {
                   Contact us today for a free consultation and quote. Our team
                   is ready to help you with your glass railing project.
                 </p>
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
+                <div className="space-y-6" data-parent>
+                  <div
+                    className="flex items-start gap-4 fade-up"
+                    data-child="1"
+                    ref={addAnimatedElement}
+                  >
                     <Phone className="h-6 w-6 text-primary mt-0.5" />
                     <div>
                       <h3 className="font-semibold">Phone</h3>
                       <p className="text-muted-foreground">022-66362506</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4">
+                  <div
+                    className="flex items-start gap-4 fade-up"
+                    data-child="2"
+                    ref={addAnimatedElement}
+                  >
                     <Mail className="h-6 w-6 text-primary mt-0.5" />
                     <div>
                       <h3 className="font-semibold">Email</h3>
@@ -666,7 +666,11 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4">
+                  <div
+                    className="flex items-start gap-4 fade-up"
+                    data-child="3"
+                    ref={addAnimatedElement}
+                  >
                     <MapPin className="h-6 w-6 text-primary mt-0.5" />
                     <div>
                       <h3 className="font-semibold">Headquaters</h3>
@@ -679,103 +683,32 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="bg-white">
-                {/* <form className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="Enter name"
-                        className="text-sm font-medium"
-                      >
-                        Name
-                      </label>
-                      <Input id="first-name" placeholder="John" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium">
-                      Email
-                    </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="john.doe@example.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="text-sm font-medium">
-                      Phone
-                    </label>
-                    <Input id="phone" placeholder="(555) 123-4567" />
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="project-type"
-                      className="text-sm font-medium"
-                    >
-                      Project Type
-                    </label>
-                    <select
-                      id="project-type"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value="">Select a project type</option>
-                      <option value="residential">Residential</option>
-                      <option value="commercial">Commercial</option>
-                      <option value="interior">Interior</option>
-                      <option value="exterior">Exterior</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="message" className="text-sm font-medium">
-                      Project Details
-                    </label>
-                    <Textarea
-                      id="message"
-                      placeholder="Please provide details about your project..."
-                      rows={4}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full">
-                    Submit Request
-                  </Button>
-                </form> */}
+              <div className="bg-white fade-right" ref={addAnimatedElement}>
                 <Form isOpen={true} isFloating={false} />
               </div>
             </div>
           </div>
         </section>
-
-        {/* <section className="py-16 md:py-24 bg-primary text-primary-foreground flex justify-center items-center px-10">
-          <div className="container">
-            <div className="text-center max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-                Ready to Transform Your Space?
-              </h2>
-              <p className="text-xl mb-8">
-                Contact us today for a free consultation and quote on your glass
-                railing project.
-              </p>
-              <Button size="lg" variant="secondary">
-                <a href="#contact">Get Started Now</a>
-              </Button>
-            </div>
-          </div>
-        </section> */}
       </main>
-      <footer className="bg-slate-900 text-slate-200 py-12 flex justify-center items-center px-10">
+      <footer
+        className="bg-slate-900 text-slate-200 py-12 flex justify-center items-center px-10"
+        ref={footerRef}
+      >
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 fade-up"
+            ref={addAnimatedElement}
+          >
             <div>
               <div className="flex flex-col gap-2 mb-6">
                 <Image
-                  src={whiteLogo}
+                  src={blacklogo || "/placeholder.svg"}
                   alt="Imperio Glass Railings Logo"
-                  width={60}
-                  height={60}
-                  className="rounded"
+                  width={100}
+                  height={100}
+                  className="rounded transition-all duration-300 hover-scale"
                 />
-                <span className="text-xl font-bold">Imperio Railings</span>
+                {/* <span className="text-xl font-bold">Imperio Railings</span> */}
               </div>
               <p className="text-slate-400 mb-6">
                 Premium glass railing solutions for residential and commercial
@@ -784,7 +717,7 @@ export default function Home() {
               <div className="flex gap-4">
                 <a
                   href="https://www.facebook.com/imperiorailingsystem"
-                  className="text-slate-400 hover:text-white"
+                  className="text-slate-400 hover:text-white transition-colors duration-300"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -796,14 +729,14 @@ export default function Home() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-5 w-5"
+                    className="h-5 w-5 transition-transform duration-300 hover-scale"
                   >
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                   </svg>
                 </a>
                 <a
                   href="https://www.instagram.com/imperio.railings/?igsh=OWlmaXB6NnJpcWJ0"
-                  className="text-slate-400 hover:text-white"
+                  className="text-slate-400 hover:text-white transition-colors duration-300"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -815,7 +748,7 @@ export default function Home() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-5 w-5"
+                    className="h-5 w-5 transition-transform duration-300 hover-scale"
                   >
                     <rect
                       width="20"
@@ -831,7 +764,7 @@ export default function Home() {
                 </a>
                 <a
                   href="https://x.com/ImperioRailing"
-                  className="text-slate-400 hover:text-white"
+                  className="text-slate-400 hover:text-white transition-colors duration-300"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -843,7 +776,7 @@ export default function Home() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-5 w-5"
+                    className="h-5 w-5 transition-transform duration-300 hover-scale"
                   >
                     <path d="M22 4.01c-.77.35-1.6.58-2.47.69a4.27 4.27 0 0 0 1.88-2.36 8.54 8.54 0 0 1-2.7 1.03A4.26 4.26 0 0 0 11.5 7c0 .34.04.67.11.98A12.1 12.1 0 0 1 3 3.86a4.27 4.27 0 0 0-.58 2.14c0 1.47.75 2.77 1.9 3.53a4.24 4.24 0 0 1-1.93-.54v.06c0 2.05 1.46 3.77 3.4 4.16a4.25 4.25 0 0 1-1.93.07 4.27 4.27 0 0 0 3.98 2.96A8.55 8.55 0 0 1 2 19.13a12.08 12.08 0 0 0 6.29 1.84c7.55 0 11.7-6.27 11.7-11.71l-.01-.53A8.3 8.3 0 0 0 22 4.01z"></path>
                   </svg>
@@ -856,7 +789,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#home"
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
                   >
                     Home
                   </Link>
@@ -864,7 +797,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#about"
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
                   >
                     About Us
                   </Link>
@@ -872,7 +805,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#products"
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
                   >
                     Products
                   </Link>
@@ -880,7 +813,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#gallery"
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
                   >
                     Gallery
                   </Link>
@@ -888,7 +821,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#testimonials"
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
                   >
                     Testimonials
                   </Link>
@@ -896,7 +829,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#contact"
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
                   >
                     Contact
                   </Link>
@@ -907,32 +840,50 @@ export default function Home() {
               <h3 className="text-lg font-semibold mb-4">Services</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-white">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
+                  >
                     Residential Railings
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-white">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
+                  >
                     Commercial Railings
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-white">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
+                  >
                     Custom Designs
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-white">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
+                  >
                     Installation
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-white">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
+                  >
                     Maintenance
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-white">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-white transition-colors duration-300"
+                  >
                     Repairs
                   </a>
                 </li>
@@ -962,7 +913,10 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-12 pt-8 text-center text-slate-400">
+          <div
+            className="border-t border-slate-800 mt-12 pt-8 text-center text-slate-400 fade-up"
+            ref={addAnimatedElement}
+          >
             <p>
               &copy; {new Date().getFullYear()} Imperio Glass Railings. All
               rights reserved.
