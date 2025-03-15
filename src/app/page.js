@@ -22,7 +22,7 @@ import staircase from "../../public/staircase.jpg";
 import mukesh from "../../public/mukeshambani.webp";
 import rakesh from "../../public/rakeshjhunjhunwala.webp";
 import salman from "../../public/salmankhan.webp";
-import whiteLogo from "../../public/White.webp";
+import whiteLogo from "../../public/Blacklogo.png";
 import { Button } from "./components/Button";
 import { Input } from "./components/Input";
 import { Textarea } from "./components/Textarea";
@@ -40,10 +40,10 @@ export default function Home() {
     { src: deck, location: "Alibaug" },
     { src: framedbalcony, location: "Andheri" },
     { src: beachside, location: "Nagothane" },
-    { src: cornerglass, location: "Goa" },
-    { src: homebalcony, location: "Jamshedpur" },
-    { src: homefence, location: "Satara" },
-    { src: staircase, location: "Bangalore" },
+    // { src: cornerglass, location: "Goa" },
+    // { src: homebalcony, location: "Jamshedpur" },
+    // { src: homefence, location: "Satara" },
+    // { src: staircase, location: "Bangalore" },
   ];
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -85,7 +85,7 @@ export default function Home() {
       />
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <nav
-          className={`bg-black shadow-md fixed top-0 w-full transition-transform duration-300 ${
+          className={`bg-white shadow-md fixed top-0 w-full transition-transform duration-300 ${
             isVisible ? "translate-y-0" : "-translate-y-full"
           }`}
         >
@@ -96,17 +96,16 @@ export default function Home() {
                 <Image
                   src={whiteLogo}
                   alt="Imperio Glass Railings Logo"
-                  width={80}
-                  height={80}
+                  width={120}
+                  height={120}
                   className="rounded"
                 />
               </div>
 
-              <a
-                href="tel:+91 8591953385"
-                className="text-gray-300 px-4 py-2 hover:bg-gray-100"
-              >
-                Call Now
+              <a href="tel:+91 8591953385">
+                <button className="px-6 py-3 text-lg font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-400 transition duration-300">
+                  Call Now
+                </button>
               </a>
             </div>
           </div>
@@ -303,26 +302,26 @@ export default function Home() {
                 <div className="flex justify-start items-center space-x-20">
                   <div className="flex flex-col justify-center items-left">
                     <h2>Happy Clients</h2>
-                    {/* <Counter target={100} /> Stops at 100 */}
-                    <span className="text-3xl font-semibold">4000 + </span>
+                    <Counter target={4000} />
+                    {/* <span className="text-3xl font-semibold">4000 + </span> */}
                   </div>
                   <div className="flex flex-col justify-center items-left">
                     <h2>Projects</h2>
-                    {/* <Counter target={500} /> Stops at 500 */}
-                    <span className="text-3xl font-semibold">7000 + </span>
+                    <Counter target={7000} />
+                    {/* <span className="text-3xl font-semibold">7000 + </span> */}
                   </div>
                   <div className="flex flex-col justify-center items-left">
                     <h2>City</h2>
-                    {/* <Counter target={500} /> Stops at 500 */}
-                    <span className="text-3xl font-semibold">100 + </span>
+                    <Counter target={100} />
+                    {/* <span className="text-3xl font-semibold">100 + </span> */}
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                  <a href="#contact" className="text-gray-700 ">
+                  {/* <a href="#contact" className="text-gray-700 ">
                     <Button className=" px-6 py-3 text-lg md:text-xl bg-blue-500 hover:bg-blue-700">
                       <h1 className="text-lg md:text-xl">Learn More</h1>
                     </Button>
-                  </a>
+                  </a> */}
                 </div>
               </div>
               <div className="relative h-[400px] rounded-lg overflow-hidden">
