@@ -42,7 +42,23 @@ const Form = ({ isOpen, onClose, isFloating }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
+    // Get form data
+    const formRe = e.target;
+    const formDataRe = new FormData(formRe);
+    let allFilled = true;
+    for (let value of formDataRe.values()) {
+      if (!value.trim()) {
+        allFilled = false;
+        break;
+      }
+    }
 
+    // If all fields are filled, redirect
+    if (allFilled) {
+      window.location.href = "https://www.imperiorailing.com/";
+    } else {
+      alert("Please fill in all fields before submitting.");
+    }
     try {
       const response = await fetch("/api/form", {
         method: "POST",
